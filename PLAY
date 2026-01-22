@@ -3,103 +3,111 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Score Settler: Snake Challenge</title>
+    <title>Score Settler | Snake 1v1</title>
     <style>
         :root {
-            --bg-color: #0a0a0a;
-            --panel-bg: #1a1a1a;
-            --snake-green: #2ecc71;
-            --food-red: #e74c3c;
+            --bg-black: #050805;
+            --panel-bg: #0d140d;
+            --neon-green: #2ecc71;
+            --bright-neon: #39ff14;
+            --deep-green: #1b4d2e;
+            --food-red: #ff3e3e;
             --p1-color: #2ecc71;
-            --p2-color: #f1c40f;
-            --text-main: #ffffff;
-            --text-dim: #888;
+            --p2-color: #a2ff00;
+            --text-main: #e0ffe0;
+            --text-dim: #70a370;
         }
 
         * { box-sizing: border-box; touch-action: none; }
+        
         body {
             margin: 0;
             padding: 0;
-            background-color: var(--bg-color);
+            background-color: var(--bg-black);
             color: var(--text-main);
             font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            overflow: hidden;
+        }
+
+        h1.title {
+            margin: 10px 0;
+            font-size: 1.1rem;
+            letter-spacing: 2px;
+            color: var(--neon-green);
+            text-transform: uppercase;
         }
 
         /* --- SCOREBOARD --- */
         #scoreboard {
-            width: 100%;
-            max-width: 600px;
+            width: 95%;
+            max-width: 400px;
             background: var(--panel-bg);
-            padding: 15px;
+            padding: 12px;
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 10px;
-            border-bottom: 3px solid #333;
+            border: 1px solid var(--deep-green);
+            border-radius: 8px;
             text-align: center;
+            margin-bottom: 10px;
         }
 
         .player-box {
-            padding: 10px;
-            border-radius: 8px;
-            background: #222;
+            padding: 8px;
+            border-radius: 6px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid #1a2e1a;
             position: relative;
-            transition: all 0.3s ease;
         }
 
-        .player-box.winning-p1 { border: 2px solid var(--p1-color); box-shadow: 0 0 10px var(--p1-color); }
-        .player-box.winning-p2 { border: 2px solid var(--p2-color); box-shadow: 0 0 10px var(--p2-color); }
+        .player-box.winning-p1 { border-color: var(--p1-color); box-shadow: 0 0 10px rgba(46, 204, 113, 0.2); }
+        .player-box.winning-p2 { border-color: var(--p2-color); box-shadow: 0 0 10px rgba(162, 255, 0, 0.2); }
 
-        .player-name { font-weight: bold; font-size: 1.1em; margin-bottom: 5px; }
-        .best-score { font-size: 2em; font-weight: 900; }
+        .player-name { font-weight: 600; font-size: 0.75em; color: var(--text-dim); }
+        .best-score { font-size: 1.8em; font-weight: 900; font-family: monospace; }
+        
         .badge {
             position: absolute;
             top: -10px;
             left: 50%;
             transform: translateX(-50%);
-            padding: 2px 10px;
-            border-radius: 20px;
-            font-size: 0.7em;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.6em;
             font-weight: bold;
             display: none;
         }
 
         #center-stats {
             grid-column: span 2;
-            padding: 10px;
-            border-top: 1px solid #333;
-            font-size: 0.9em;
+            padding-top: 8px;
+            border-top: 1px solid var(--deep-green);
+            font-size: 0.8em;
         }
 
-        #countdown { color: #ff4757; font-weight: bold; }
-        #stakes-display { font-style: italic; color: var(--text-dim); margin-top: 5px; }
+        #countdown { color: var(--bright-neon); font-family: monospace; }
 
         /* --- GAME AREA --- */
         #game-container {
             position: relative;
-            margin: 20px 0;
-            width: 90vw;
-            max-width: 400px;
-            aspect-ratio: 1/1;
+            width: 360px;
+            height: 360px;
+            border: 4px solid var(--deep-green);
+            background: #000;
         }
 
         canvas {
-            background: #000;
-            border: 2px solid #333;
-            width: 100%;
-            height: 100%;
-            image-rendering: pixelated;
+            display: block;
         }
 
         /* --- UI OVERLAYS --- */
         .overlay {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85);
+            background: rgba(0, 0, 0, 0.9);
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -107,64 +115,72 @@
             z-index: 10;
         }
 
-        #setup-screen select, button {
-            padding: 12px 24px;
-            margin: 10px;
-            font-size: 1em;
+        select, button {
+            padding: 12px 20px;
+            margin: 5px;
+            font-size: 1rem;
+            border-radius: 4px;
+        }
+
+        button {
+            background: var(--neon-green);
+            color: #000;
             border: none;
-            border-radius: 5px;
+            font-weight: bold;
             cursor: pointer;
         }
 
-        button { background: var(--snake-green); color: black; font-weight: bold; }
-        button:hover { opacity: 0.9; }
-        
         #current-score-hud {
             position: absolute;
             top: 10px;
-            right: 10px;
-            font-size: 1.5em;
+            left: 10px;
+            font-family: monospace;
             font-weight: bold;
-            text-shadow: 2px 2px #000;
+            color: var(--neon-green);
+            font-size: 1.2rem;
             pointer-events: none;
         }
 
-        .hidden { display: none !important; }
-        
-        @media (max-width: 400px) {
-            .best-score { font-size: 1.5em; }
-            #scoreboard { padding: 10px; }
+        .challenge-footer {
+            margin-top: 20px;
+            color: var(--neon-green);
+            text-decoration: none;
+            font-size: 0.9em;
+            border: 1px solid var(--deep-green);
+            padding: 8px 15px;
+            border-radius: 20px;
         }
+
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-    <!-- SCOREBOARD -->
+    <h1 class="title">Score Settler</h1>
+
     <div id="scoreboard">
         <div class="player-box" id="p1-box">
             <div id="p1-badge" class="badge"></div>
-            <div class="player-name" id="p1-label">Player 1</div>
+            <div class="player-name" id="p1-label">P1</div>
             <div class="best-score" id="p1-best">0</div>
         </div>
         <div class="player-box" id="p2-box">
             <div id="p2-badge" class="badge"></div>
-            <div class="player-name" id="p2-label">Player 2</div>
+            <div class="player-name" id="p2-label">P2</div>
             <div class="best-score" id="p2-best">0</div>
         </div>
         <div id="center-stats">
-            <div>Ends in: <span id="countdown">Loading...</span></div>
-            <div id="stakes-display">Stakes: Loading...</div>
+            <div>ENDS: <span id="countdown">00:00:00</span></div>
+            <div id="stakes-display" style="font-style: italic; color: #555">Wager: Coffee</div>
         </div>
     </div>
 
-    <!-- GAME CONTAINER -->
     <div id="game-container">
-        <canvas id="gameCanvas" width="400" height="400"></canvas>
-        <div id="current-score-hud">Score: 0</div>
+        <canvas id="gameCanvas" width="360" height="360"></canvas>
+        <div id="current-score-hud">SCORE: 00</div>
 
-        <!-- SETUP OVERLAY -->
         <div id="setup-screen" class="overlay">
-            <h2 style="margin-top:0">Choose Your Side</h2>
+            <h3 style="color:var(--neon-green)">SELECT PLAYER</h3>
             <select id="player-select">
                 <option value="p1" id="p1-opt">Player 1</option>
                 <option value="p2" id="p2-opt">Player 2</option>
@@ -172,38 +188,33 @@
             <button onclick="startGame()">START GAME</button>
         </div>
 
-        <!-- GAME OVER OVERLAY -->
         <div id="game-over-screen" class="overlay hidden">
-            <h1 style="color:var(--food-red)">GAME OVER</h1>
-            <p>Final Score: <span id="final-score">0</span></p>
-            <button id="save-btn" onclick="saveScore()">SAVE SCORE</button>
-            <button style="background:#555; color:white" onclick="resetUI()">BACK</button>
+            <h2 style="color:var(--food-red)">GAME OVER</h2>
+            <p>FINAL SCORE: <span id="final-score" style="color:var(--bright-neon)">0</span></p>
+            <button onclick="saveScore()">SAVE SCORE</button>
+            <button style="background:transparent; color:#888; border:1px solid #444" onclick="resetUI()">CANCEL</button>
         </div>
     </div>
 
+    <a href="snake.html" class="challenge-footer">Challenge Me at Snake 🐍</a>
+
     <script>
-        /** 
-         * ==========================================
-         * CHALLENGE CONFIGURATION
-         * ==========================================
-         */
+        /** CONFIG **/
         const CONFIG = {
-            p1Name: "CHALLENGER",       // Replace with Your Name
-            p2Name: "RIVAL",            // Replace with Friend's Name
-            deadline: "Dec 25, 2024",   // Format: "Month Day, Year"
+            p1Name: "Player 1",       
+            p2Name: "Player 2",            
+            deadline: "Dec 31, 2024",   
             stakes: "Loser buys winner coffee" 
         };
 
-        /** GAME CORE **/
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-        const gridSize = 20;
+        const gridSize = 20; // Size of one square
         const tileCount = canvas.width / gridSize;
 
         let snake, food, dx, dy, score, gameLoop, activePlayer;
-        let isPaused = true;
 
-        // Initialize display
+        // Init Setup
         document.getElementById('p1-label').innerText = CONFIG.p1Name;
         document.getElementById('p2-label').innerText = CONFIG.p2Name;
         document.getElementById('p1-opt').innerText = CONFIG.p1Name;
@@ -211,47 +222,45 @@
         document.getElementById('stakes-display').innerText = `Stakes: ${CONFIG.stakes}`;
 
         function initGame() {
-            snake = [{x: 10, y: 10}];
+            snake = [{x: 10, y: 10}, {x: 9, y: 10}, {x: 8, y: 10}];
             food = {x: 5, y: 5};
-            dx = 0; dy = 0;
+            dx = 1; 
+            dy = 0;
             score = 0;
             updateHUD();
+            placeFood();
         }
 
         function startGame() {
             activePlayer = document.getElementById('player-select').value;
             document.getElementById('setup-screen').classList.add('hidden');
             initGame();
-            isPaused = false;
-            // First move sets direction to prevent instant death
-            dx = 1; dy = 0; 
             if (gameLoop) clearInterval(gameLoop);
-            gameLoop = setInterval(draw, 100);
+            // SPEED: 135ms (Higher number = Slower snake)
+            gameLoop = setInterval(draw, 135); 
         }
 
         function draw() {
-            moveSnake();
+            updatePhysics();
             if (checkGameOver()) return;
 
-            // Clear Background
-            ctx.fillStyle = "#000";
+            // 1. Clear Screen
+            ctx.fillStyle = "#000000";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Draw Food
-            ctx.fillStyle = "var(--food-red)";
-            ctx.fillRect(food.x * gridSize, food.y * gridSize, gridSize - 2, gridSize - 2);
+            // 2. Draw Food (Solid Red Square)
+            ctx.fillStyle = "#ff3e3e";
+            ctx.fillRect(food.x * gridSize + 1, food.y * gridSize + 1, gridSize - 2, gridSize - 2);
 
-            // Draw Snake
-            ctx.fillStyle = "var(--snake-green)";
+            // 3. Draw Snake
             snake.forEach((part, index) => {
-                // Head is slightly brighter
-                if(index === 0) ctx.fillStyle = "#58d68d";
-                else ctx.fillStyle = "var(--snake-green)";
-                ctx.fillRect(part.x * gridSize, part.y * gridSize, gridSize - 2, gridSize - 2);
+                // Head is brighter neon, body is regular neon green
+                ctx.fillStyle = (index === 0) ? "#39ff14" : "#2ecc71";
+                ctx.fillRect(part.x * gridSize + 1, part.y * gridSize + 1, gridSize - 2, gridSize - 2);
             });
         }
 
-        function moveSnake() {
+        function updatePhysics() {
             const head = {x: snake[0].x + dx, y: snake[0].y + dy};
             snake.unshift(head);
 
@@ -267,26 +276,31 @@
         function placeFood() {
             food.x = Math.floor(Math.random() * tileCount);
             food.y = Math.floor(Math.random() * tileCount);
-            // Don't place food on snake
+            // Prevent food from appearing on snake body
             if (snake.some(p => p.x === food.x && p.y === food.y)) placeFood();
         }
 
         function checkGameOver() {
             const head = snake[0];
-            const hitWall = head.x < 0 || head.x >= tileCount || head.y < 0 || head.y >= tileCount;
-            const hitSelf = snake.slice(1).some(p => p.x === head.x && p.y === head.y);
-
-            if (hitWall || hitSelf) {
-                clearInterval(gameLoop);
-                document.getElementById('final-score').innerText = score;
-                document.getElementById('game-over-screen').classList.remove('hidden');
-                return true;
+            if (head.x < 0 || head.x >= tileCount || head.y < 0 || head.y >= tileCount) {
+                endGame(); return true;
+            }
+            for (let i = 1; i < snake.length; i++) {
+                if (snake[i].x === head.x && snake[i].y === head.y) {
+                    endGame(); return true;
+                }
             }
             return false;
         }
 
+        function endGame() {
+            clearInterval(gameLoop);
+            document.getElementById('final-score').innerText = score;
+            document.getElementById('game-over-screen').classList.remove('hidden');
+        }
+
         function updateHUD() {
-            document.getElementById('current-score-hud').innerText = `Score: ${score}`;
+            document.getElementById('current-score-hud').innerText = `SCORE: ${score}`;
         }
 
         function saveScore() {
@@ -304,107 +318,58 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
 
-        /** SCOREBOARD LOGIC **/
         function updateScoreboard() {
-            const s1 = parseInt(localStorage.getItem('best_p1')) || 0;
-            const s2 = parseInt(localStorage.getItem('best_p2')) || 0;
-
+            const s1 = localStorage.getItem('best_p1') || 0;
+            const s2 = localStorage.getItem('best_p2') || 0;
             document.getElementById('p1-best').innerText = s1;
             document.getElementById('p2-best').innerText = s2;
-
-            const p1Box = document.getElementById('p1-box');
-            const p2Box = document.getElementById('p2-box');
-
-            p1Box.classList.remove('winning-p1');
-            p2Box.classList.remove('winning-p2');
-
-            if (s1 > s2) p1Box.classList.add('winning-p1');
-            else if (s2 > s1) p2Box.classList.add('winning-p2');
             
+            document.getElementById('p1-box').className = 'player-box' + (s1 > s2 ? ' winning-p1' : '');
+            document.getElementById('p2-box').className = 'player-box' + (s2 > s1 ? ' winning-p2' : '');
             checkDeadline();
         }
 
-        /** COUNTDOWN & WINNER LOGIC **/
         function checkDeadline() {
             const target = new Date(CONFIG.deadline).getTime();
             const now = new Date().getTime();
             const diff = target - now;
 
-            const p1Badge = document.getElementById('p1-badge');
-            const p2Badge = document.getElementById('p2-badge');
-
             if (diff <= 0) {
-                document.getElementById('countdown').innerText = "CHALLENGE ENDED";
-                const s1 = parseInt(localStorage.getItem('best_p1')) || 0;
-                const s2 = parseInt(localStorage.getItem('best_p2')) || 0;
-
-                p1Badge.style.display = 'block';
-                p2Badge.style.display = 'block';
-
-                if (s1 > s2) {
-                    setResult(p1Badge, "🏆 WINNER", "var(--p1-color)");
-                    setResult(p2Badge, "😔 LOSER - Pay Up!", "var(--food-red)");
-                } else if (s2 > s1) {
-                    setResult(p2Badge, "🏆 WINNER", "var(--p2-color)");
-                    setResult(p1Badge, "😔 LOSER - Pay Up!", "var(--food-red)");
-                } else {
-                    setResult(p1Badge, "🤝 DRAW", "#888");
-                    setResult(p2Badge, "🤝 DRAW", "#888");
-                }
+                document.getElementById('countdown').innerText = "CLOSED";
+                // Add Winner Logic Here
             } else {
-                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                document.getElementById('countdown').innerText = `${days}d ${hours}h ${mins}m`;
+                const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const s = Math.floor((diff % (1000 * 60)) / 1000);
+                document.getElementById('countdown').innerText = `${h}h ${m}m ${s}s`;
             }
         }
 
-        function setResult(el, text, color) {
-            el.innerText = text;
-            el.style.background = color;
-            el.style.color = (color === "var(--p2-color)" || color === "var(--p1-color)") ? "black" : "white";
-        }
-
-        /** CONTROLS **/
+        // INPUTS
         window.addEventListener('keydown', e => {
-            if (isPaused) return;
-            switch(e.key) {
-                case 'ArrowUp':    if(dy !== 1)  { dx = 0; dy = -1; } break;
-                case 'ArrowDown':  if(dy !== -1) { dx = 0; dy = 1;  } break;
-                case 'ArrowLeft':  if(dx !== 1)  { dx = -1; dy = 0; } break;
-                case 'ArrowRight': if(dx !== -1) { dx = 1; dy = 0;  } break;
+            if (e.key === 'ArrowUp' && dy === 0) { dx = 0; dy = -1; }
+            if (e.key === 'ArrowDown' && dy === 0) { dx = 0; dy = 1; }
+            if (e.key === 'ArrowLeft' && dx === 0) { dx = -1; dy = 0; }
+            if (e.key === 'ArrowRight' && dx === 0) { dx = 1; dy = 0; }
+        });
+
+        // SWIPE
+        let startX, startY;
+        document.addEventListener('touchstart', e => { startX = e.touches[0].clientX; startY = e.touches[0].clientY; });
+        document.addEventListener('touchend', e => {
+            let endX = e.changedTouches[0].clientX;
+            let endY = e.changedTouches[0].clientY;
+            let xDiff = endX - startX;
+            let yDiff = endY - startY;
+            if (Math.abs(xDiff) > Math.abs(yDiff)) {
+                if (xDiff > 0 && dx === 0) { dx = 1; dy = 0; } else if (dx === 0) { dx = -1; dy = 0; }
+            } else {
+                if (yDiff > 0 && dy === 0) { dx = 0; dy = 1; } else if (dy === 0) { dx = 0; dy = -1; }
             }
         });
 
-        // Swipe Support
-        let touchStartX = 0;
-        let touchStartY = 0;
-
-        document.addEventListener('touchstart', e => {
-            touchStartX = e.changedTouches[0].screenX;
-            touchStartY = e.changedTouches[0].screenY;
-        }, false);
-
-        document.addEventListener('touchend', e => {
-            let x = e.changedTouches[0].screenX;
-            let y = e.changedTouches[0].screenY;
-            
-            let xDiff = x - touchStartX;
-            let yDiff = y - touchStartY;
-
-            if (Math.abs(xDiff) > Math.abs(yDiff)) {
-                if (xDiff > 0 && dx !== -1) { dx = 1; dy = 0; }
-                else if (xDiff < 0 && dx !== 1) { dx = -1; dy = 0; }
-            } else {
-                if (yDiff > 0 && dy !== -1) { dx = 0; dy = 1; }
-                else if (yDiff < 0 && dy !== 1) { dx = 0; dy = -1; }
-            }
-        }, false);
-
-        // Run updates
-        setInterval(checkDeadline, 1000);
         updateScoreboard();
-
+        setInterval(checkDeadline, 1000);
     </script>
 </body>
 </html>
